@@ -119,16 +119,30 @@ Our method requires the same data format as 3DGS. For your own data, you can use
 
 ## Getting Started 
 
-Our code is based on the excellent official repo for [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS). 
+Our code is based on the excellent official repo for [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS) and [LightGaussian](https://github.com/VITA-Group/LightGaussian). 
 
 ## Training
 
+### Coarse Pruning
 
+1. Run opacity-based coarse pruning:
+
+   ```shell
+   bash run.sh /path/to/scene /path/to/output 1
+   ```
+
+2. Run score-based coarse pruning using LightGaussian:
+
+   ```shell
+   python prune_finetune.py
+   ```
+
+### Fine Pruning
+
+Run KD-tree-based fine pruning:
 
 ```shell
-
-cd gaussian-splatting
-bash run.sh
+python rf_pruning.py
 ```
 
 ## Pre-trained Models
