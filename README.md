@@ -35,6 +35,113 @@ dataset/
 │   ├── Dormitory/
 │   └── Sofa/
    
+## Dataset
 
+### Mip-NeRF 360 Dataset
+
+Please download the Mip-NeRF 360 dataset processed by colmap from [Mip-NeRF 360](https://jonbarron.info/mipnerf360/):
+
+```
+360_v2
+    |---bicycle
+    |   |---images
+    |   |   |---<image 0>
+    |   |   |---<image 1>
+    |   |   |---...
+    |   |---images_2
+    |   |---images_4
+    |   |---images_8
+    |   |---sparse
+    |       |---0
+    |           |---cameras.bin
+    |           |---images.bin
+    |           |---points3D.bin
+    |---bonsai
+    |---...
+```
+
+### Tanks and Temples Dataset
+
+#### Option 1
+
+We thank [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS) for constructing the processed Tanks and Temples dataset, which is available for direct download via [OneDrive](https://connecthkuhk-my.sharepoint.com/:u:/g/personal/u3009782_connect_hku_hk/EehzMcKeoclAnVdgPyyBxNwB24ve5bk3ZSct38AUWPbprw?e=uWEc5a). Please agree the official license before download it.
+
+#### Option 2 
+
+Tanks and Temples is divided into three parts, comprising a total of 21 scenes: Intermediate ('Family', 'Francis', 'Horse', 'Lighthouse', 'M60', 'Panther', 'Playground', 'Train'), Advanced ('Auditorium', 'Ballroom', 'Courtroom', 'Museum', 'Palace', 'Temple'), and Training Data ('Barn', 'Caterpillar', 'Church', 'Courthouse', 'Ignatius', 'Meetingroom', 'Truck').
+
+Please download the "image set" of all scenes from the Tanks and Temples dataset from [Tanks and Temples](https://www.tanksandtemples.org/download/). After unzipping, rename the image folder directories of all scenes to "input". The organized folder structure is as follows:
+
+```
+---tanks_and_temples
+    |---Auditorium
+    |   |---input
+    |   |   |---<image 0>
+    |   |   |---<image 1>
+    |   |   |---...
+    |---Ballroom
+    |---...
+```
+
+After configuring libraries such as colmap according to the method in the original [Pixel-GS code]([https://github.com/graphdeco-inria/gaussian-splatting], use the following command to generate camera poses for all scenes in Tanks and Temples:
+
+```
+python ./prepose.py
+```
+
+Finally, the current directory should contain the following folders:
+
+```
+---tanks_and_temples
+    |---Auditorium
+    |   |---images
+    |   |   |---<image 0>
+    |   |   |---<image 1>
+    |   |   |---...
+    |   |---images_2
+    |   |---images_4
+    |   |---images_8
+    |   |---sparse
+    |       |---0
+    |           |---cameras.bin
+    |           |---images.bin
+    |           |---points3D.bin
+    |---Ballroom
+    |---...
+```
+
+Then, you need to rename the folder 'images_2' to 'images', since the resolution we are working with is close to 980x545.
+You can also avoid renaming by simply changing `factors = [1] * len(scenes)` to `factors = [2] * len(scenes)` in `./script/tanks_and_temples.py`. This modification will instruct the code to reshape the images upon loading during training.
+
+### Your Own Dataset
+
+Our method requires the same data format as 3DGS. For your own data, you can use the processing method found in the ["Processing your own Scenes"](https://github.com/graphdeco-inria/gaussian-splatting?tab=readme-ov-file#processing-your-own-scenes) section of the original 3DGS code.
+
+## Getting Started 
+
+Our code is based on the excellent official repo for [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting/tree/main). 
+
+## Training
+
+Modify the paths to dataset and output folder in the ```run.sh``` script. In practice, increasing the learning rate after pruning (e.g., setting `position_lr_init = 5e-6`) can partially reproduce the effect of the third stage, serving as a lightweight approximation.
+
+```shell
+
+cd gaussian-splatting
+bash run.sh
+```
+
+## Pre-trained Models
+
+
+
+
+
+
+## Acknowledgement
+This project is built upon [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting), [Pixel-GS]([https://github.com/graphdeco-inria/gaussian-splatting](https://github.com/zhengzhang01/Pixel-GS)) and [LightGaussian](https://github.com/VITA-Group/LightGaussian). We thank all authors for their great work!
+## License
+
+This repository is released under the Apache 2.0 license. Please see the [LICENSE](./LICENSE) file for more information.
 
 
