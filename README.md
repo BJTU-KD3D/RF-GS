@@ -37,8 +37,4 @@ dataset/
    
 
 
-## 📂 Repository Status
 
-🚧 The source code will be released **soon**. Stay tuned! 🚧
-
----
