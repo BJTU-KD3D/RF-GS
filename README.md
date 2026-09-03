@@ -128,7 +128,7 @@ Our code is based on the excellent official repo for [Pixel-GS](https://github.c
 1. Run opacity-based coarse pruning:
 
    ```shell
-   bash run.sh /path/to/scene /path/to/output 1
+   bash run.sh 
    ```
 
 2. Run score-based coarse pruning using LightGaussian:
