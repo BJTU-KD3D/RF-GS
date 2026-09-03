@@ -131,7 +131,7 @@ Our code is based on the excellent official repo for [Pixel-GS](https://github.c
    bash run.sh 
    ```
 
-2. Run score-based coarse pruning using LightGaussian:
+2. Run score-based coarse pruning using [LightGaussian](https://github.com/VITA-Group/LightGaussian):
 
    ```shell
    python prune_finetune.py
