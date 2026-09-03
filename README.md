@@ -34,8 +34,8 @@ dataset/
 │   ├── Coffee/
 │   ├── Dormitory/
 │   └── Sofa/
-   
-## Dataset
+    |---...
+```
 
 ### Mip-NeRF 360 Dataset
 
@@ -60,6 +60,7 @@ Please download the Mip-NeRF 360 dataset processed by colmap from [Mip-NeRF 360]
     |---...
 ```
 
+
 ### Tanks and Temples Dataset
 
 #### Option 1
@@ -83,7 +84,7 @@ Please download the "image set" of all scenes from the Tanks and Temples dataset
     |---...
 ```
 
-After configuring libraries such as colmap according to the method in the original [Pixel-GS code]([https://github.com/graphdeco-inria/gaussian-splatting], use the following command to generate camera poses for all scenes in Tanks and Temples:
+After configuring libraries such as colmap according to the method in the original [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS), use the following command to generate camera poses for all scenes in Tanks and Temples:
 
 ```
 python ./prepose.py
@@ -119,7 +120,7 @@ Our method requires the same data format as 3DGS. For your own data, you can use
 
 ## Getting Started 
 
-Our code is based on the excellent official repo for [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting/tree/main). 
+Our code is based on the excellent official repo for [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS). 
 
 ## Training
 
@@ -139,7 +140,7 @@ bash run.sh
 
 
 ## Acknowledgement
-This project is built upon [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting), [Pixel-GS]([https://github.com/graphdeco-inria/gaussian-splatting](https://github.com/zhengzhang01/Pixel-GS)) and [LightGaussian](https://github.com/VITA-Group/LightGaussian). We thank all authors for their great work!
+This project is built upon [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting), [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS) and [LightGaussian](https://github.com/VITA-Group/LightGaussian). We thank all authors for their great work!
 ## License
 
 This repository is released under the Apache 2.0 license. Please see the [LICENSE](./LICENSE) file for more information.
