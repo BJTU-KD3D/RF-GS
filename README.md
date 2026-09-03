@@ -1,125 +1,78 @@
-# RF-GS: Reducing Floaters with High-order Regularization for 3D Gaussian Splatting
+# RF-GS
 
-This is the official code repository for the paper:
+Official implementation of **RF-GS: Reducing Floaters with High-order
+Regularization for 3D Gaussian Splatting**.
 
-**"RF-GS: Reducing Floaters with High-order Regularization for 3D Gaussian Splatting"**
+RF-GS introduces opacity-aware regularization and pruning to suppress abnormal
+high-opacity Gaussian points and reduce floater artifacts. The implementation
+is provided as a compact patch for Pixel-GS so that the upstream project,
+submodules, viewer, and data-processing tools remain unchanged.
 
----
+## Contents
 
-## Dataset
+| File | Destination in Pixel-GS |
+| --- | --- |
+| `train.py` | `train.py` |
+| `rf_pruning.py` | `rf_pruning.py` |
+| `gaussian_model.py` | `scene/gaussian_model.py` |
+| `loss_utils.py` | `utils/loss_utils.py` |
+| `arguments.py` | `arguments/__init__.py` |
+| `dataset_readers.py` | `scene/dataset_readers.py` |
+| `run.sh` | `run.sh` |
 
-The Real-World(RW) dataset can be downloaded from Google Drive:
+The release contains source code only. Datasets, checkpoints, logs, rendered
+images, point clouds, and experiment outputs are intentionally excluded.
 
-[Download RW Dataset](https://drive.google.com/file/d/1aQb3zRGBIOcqzKTWiBbAKqcf6T1VEI-i/view?usp=sharing)
+## Installation
 
-After downloading and extracting, place the dataset as:
+Clone Pixel-GS with its submodules and create the environment described by the
+upstream project:
+
+```bash
+git clone --recursive https://github.com/zhengzhang01/Pixel-GS.git
+cd Pixel-GS
+
+conda create -n rfgs python=3.9 -y
+conda activate rfgs
+conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.8 -c pytorch -c nvidia
+pip install -r requirements.txt
+pip install ./submodules/diff-gaussian-rasterization
+pip install ./submodules/simple-knn
+cd ..
+```
+
+Apply the RF-GS patch. The installer validates the Pixel-GS checkout and saves
+the replaced files under `Pixel-GS/.rf-gs-backup/`.
+
+```bash
+pip install -r RF-GS/requirements.txt
+bash RF-GS/move_files_to_pixelgs.sh ./Pixel-GS
+cd Pixel-GS
+```
+
+## Datasets
+
+RF-GS uses the same COLMAP-based scene format as Pixel-GS and 3DGS.
+
+- [Mip-NeRF 360](https://jonbarron.info/mipnerf360/): combine the scenes from
+  Dataset Parts 1 and 2 after downloading them.
+- [Tanks and Temples](https://www.tanksandtemples.org/download/): follow the
+  Pixel-GS preprocessing instructions or use its processed release.
+- [RF-GS Real-World dataset](https://drive.google.com/file/d/1aQb3zRGBIOcqzKTWiBbAKqcf6T1VEI-i/view?usp=sharing).
+- Custom scenes: follow the 3DGS
+  [COLMAP conversion instructions](https://github.com/graphdeco-inria/gaussian-splatting#processing-your-own-scenes).
+
+A processed scene should have this basic structure:
 
 ```text
-dataset/
-├── Bike/
-│   ├── images/
-│   └── sparse/0/
-├── Building/
-│   ├── images/
-│   └── sparse/0/
-├── Playground/
-│   ├── images/
-│   └── sparse/0/
-├── Podium/
-│   ├── images/
-│   └── sparse/0/
-├── indoor/
-│   ├── Bar/
-│   ├── Chair/
-│   ├── Coffee/
-│   ├── Dormitory/
-│   └── Sofa/
-    |---...
+scene/
+├── images/
+└── sparse/
+    └── 0/
+        ├── cameras.bin
+        ├── images.bin
+        └── points3D.bin
 ```
-
-### Mip-NeRF 360 Dataset
-
-Please download the Mip-NeRF 360 dataset processed by colmap from [Mip-NeRF 360](https://jonbarron.info/mipnerf360/):
-
-```
-360_v2
-    |---bicycle
-    |   |---images
-    |   |   |---<image 0>
-    |   |   |---<image 1>
-    |   |   |---...
-    |   |---images_2
-    |   |---images_4
-    |   |---images_8
-    |   |---sparse
-    |       |---0
-    |           |---cameras.bin
-    |           |---images.bin
-    |           |---points3D.bin
-    |---bonsai
-    |---...
-```
-
-
-### Tanks and Temples Dataset
-
-#### Option 1
-
-We thank [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS) for constructing the processed Tanks and Temples dataset, which is available for direct download via [OneDrive](https://connecthkuhk-my.sharepoint.com/:u:/g/personal/u3009782_connect_hku_hk/EehzMcKeoclAnVdgPyyBxNwB24ve5bk3ZSct38AUWPbprw?e=uWEc5a). Please agree the official license before download it.
-
-#### Option 2 
-
-Tanks and Temples is divided into three parts, comprising a total of 21 scenes: Intermediate ('Family', 'Francis', 'Horse', 'Lighthouse', 'M60', 'Panther', 'Playground', 'Train'), Advanced ('Auditorium', 'Ballroom', 'Courtroom', 'Museum', 'Palace', 'Temple'), and Training Data ('Barn', 'Caterpillar', 'Church', 'Courthouse', 'Ignatius', 'Meetingroom', 'Truck').
-
-Please download the "image set" of all scenes from the Tanks and Temples dataset from [Tanks and Temples](https://www.tanksandtemples.org/download/). After unzipping, rename the image folder directories of all scenes to "input". The organized folder structure is as follows:
-
-```
----tanks_and_temples
-    |---Auditorium
-    |   |---input
-    |   |   |---<image 0>
-    |   |   |---<image 1>
-    |   |   |---...
-    |---Ballroom
-    |---...
-```
-
-After configuring libraries such as colmap according to the method in the original [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS), use the following command to generate camera poses for all scenes in Tanks and Temples:
-
-```
-python ./prepose.py
-```
-
-Finally, the current directory should contain the following folders:
-
-```
----tanks_and_temples
-    |---Auditorium
-    |   |---images
-    |   |   |---<image 0>
-    |   |   |---<image 1>
-    |   |   |---...
-    |   |---images_2
-    |   |---images_4
-    |   |---images_8
-    |   |---sparse
-    |       |---0
-    |           |---cameras.bin
-    |           |---images.bin
-    |           |---points3D.bin
-    |---Ballroom
-    |---...
-```
-
-
-
-### Your Own Dataset
-
-Our method requires the same data format as 3DGS. For your own data, you can use the processing method found in the ["Processing your own Scenes"](https://github.com/graphdeco-inria/gaussian-splatting?tab=readme-ov-file#processing-your-own-scenes) section of the original 3DGS code.
-
-## Getting Started 
-
-Our code is based on the excellent official repo for [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS) and [LightGaussian](https://github.com/VITA-Group/LightGaussian). 
 
 ## Training
 
@@ -128,10 +81,10 @@ Our code is based on the excellent official repo for [Pixel-GS](https://github.c
 1. Run opacity-based coarse pruning:
 
    ```shell
-   bash run.sh 
+   bash run.sh /path/to/scene /path/to/output 1
    ```
 
-2. Run score-based coarse pruning using [LightGaussian](https://github.com/VITA-Group/LightGaussian):
+2. Run score-based coarse pruning using LightGaussian:
 
    ```shell
    python prune_finetune.py
@@ -145,17 +98,39 @@ Run KD-tree-based fine pruning:
 python rf_pruning.py
 ```
 
-## Pre-trained Models
+## Evaluation
 
+```shell
+python render.py -m /path/to/output --skip_train
+python metrics.py -m /path/to/output
+```
 
+### Sparse-view DTU
 
+`dataset_readers.py` supports fixed training views and an external initial
+point cloud through environment variables. For the nine-view CoR-GS protocol:
 
+```bash
+PIXELGS_TRAIN_INDICES="25,22,28,40,44,48,0,8,13" \
+PIXELGS_INIT_PLY="/path/to/scan/9_views/dense/fused.ply" \
+python train.py -s /path/to/scan -m ./output/scan_9views --eval
+```
 
+## Viewer
 
-## Acknowledgement
-This project is built upon [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting), [Pixel-GS](https://github.com/zhengzhang01/Pixel-GS) and [LightGaussian](https://github.com/VITA-Group/LightGaussian). We thank all authors for their great work!
-## License
+RF-GS keeps the Pixel-GS/3DGS point-cloud format and can use the original 3DGS
+viewer. See the upstream
+[viewer documentation](https://github.com/graphdeco-inria/gaussian-splatting#interactive-viewers).
 
-This repository is released under the Apache 2.0 license. Please see the [LICENSE](./LICENSE) file for more information.
+## TODO List
 
+- [ ] Update the score-based coarse-pruning implementation and complete the
+  geometry-and-anisotropy fine-pruning implementation.
+- [ ] Provide a demo and additional visualizations.
 
+## Acknowledgements and License
+
+This code is based on Pixel-GS and 3D Gaussian Splatting. Please cite those
+projects when appropriate. The inherited source files retain their original
+copyright headers and are subject to `LICENSE_3DGS.md`; repository-level terms
+are provided by the root `LICENSE.md`.
