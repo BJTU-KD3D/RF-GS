@@ -123,7 +123,7 @@ Our code is based on the excellent official repo for [Pixel-GS](https://github.c
 
 ## Training
 
-Modify the paths to dataset and output folder in the ```run.sh``` script. In practice, increasing the learning rate after pruning (e.g., setting `position_lr_init = 5e-6`) can partially reproduce the effect of the third stage, serving as a lightweight approximation.
+
 
 ```shell
 
